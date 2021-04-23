@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private  var lastImageCount:Int = 0
     private var recyclerViewLoading = true
     private lateinit var tabs: TabLayout;
+    private var current_shown_tab = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,12 +147,10 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun renderImages(
-        images: List<PixabayImage>
-    ) {
+    private fun renderImages(images: List<PixabayImage>) {
         val pixabayImageAdapter =
             PixabayImageAdapter(images, R.layout.image_item, applicationContext)
-        pixabayImageAdapter.setmOnItemClickListener(object :
+            pixabayImageAdapter.setmOnItemClickListener(object :
             PixabayImageAdapter.OnItemClickListener {
             override fun onImageClicked(
                 v: View?,
@@ -159,28 +158,32 @@ class MainActivity : AppCompatActivity() {
                 pixabayImage: PixabayImage?
             ) {
                 if (pixabayImage != null) {
-                    addToFavList(pixabayImage)
+                    manageFavList(pixabayImage)
                 }
             }
         })
         recycler_view.adapter = pixabayImageAdapter
     }
 
-    private fun addToFavList(pixabayImage: PixabayImage) {
-        if (fav_ids.contains(pixabayImage.id)) {
+    private fun manageFavList(pixabayImage: PixabayImage) {
+        if (current_shown_tab==1 && fav_ids.contains(pixabayImage.id)) {
             fav_image_list.remove(pixabayImage)
             fav_ids.remove(pixabayImage.id)
-        } else {
+            return
+        }
+        if(current_shown_tab==0 && !(fav_ids.contains(pixabayImage.id))){
             fav_image_list.add(pixabayImage)
             fav_ids.add(pixabayImage.id)
         }
     }
 
     fun renderSearchTab() {
+        current_shown_tab = 0
         renderImages(cur_image_list)
     }
 
     fun renderFavTab() {
+        current_shown_tab = 1
         renderImages(fav_image_list)
     }
 }
