@@ -1,9 +1,11 @@
-package com.example.pixabay_android_kotlin.activity
+package com.example.pixabay_android_kotlin.view
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -25,25 +27,25 @@ import java.util.*
 import kotlin.collections.HashSet
 
 class MainActivity : AppCompatActivity() {
-    val INIT_PAGE = 0
-    val PER_PAGE = 6
+    private val INIT_PAGE = 0
+    private val PER_PAGE = 6
 
     //const
     private var retrofit: Retrofit? = null
-    private lateinit var recycler_view: RecyclerView;
-    private val cur_image_list: ArrayList<PixabayImage> = ArrayList<PixabayImage>()
-    private val fav_image_list: ArrayList<PixabayImage> = ArrayList<PixabayImage>()
-    private val fav_ids: MutableSet<Int> = HashSet<Int>()
+    private lateinit var recyclerView: RecyclerView;
+    private val curImageList: ArrayList<PixabayImage> = ArrayList<PixabayImage>()
+    private val favImageList: ArrayList<PixabayImage> = ArrayList<PixabayImage>()
+    private val favIds: MutableSet<Int> = HashSet<Int>()
 
-    private lateinit var input_text: EditText
+    private lateinit var inputText: EditText
     private var query = ""
-    private var cur_page: Int = INIT_PAGE
+    private var curPage: Int = INIT_PAGE
     private var visibleImageCount = 0
     private  var totalImageCount:Int = 0
     private  var lastImageCount:Int = 0
     private var recyclerViewLoading = true
     private lateinit var tabs: TabLayout;
-    private var current_shown_tab = 0
+    private var currentShownTab = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,24 +60,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initInputText() {
-        input_text = findViewById<EditText>(R.id.inputQueryText);
-        input_text.setOnKeyListener(View.OnKeyListener setOnKeyListener@{ v: View?, keyCode: Int, event: KeyEvent ->
+        inputText = findViewById(R.id.inputQueryText);
+        inputText.setOnKeyListener(View.OnKeyListener setOnKeyListener@{ v: View?, keyCode: Int, event: KeyEvent ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
-                query = input_text.getText().toString()
-                cur_page = INIT_PAGE
-                cur_image_list.clear()
+                query = inputText.getText().toString()
+                curPage = INIT_PAGE
+                curImageList.clear()
                 connectAndGetApiData()
+                v?.hideKeyboard()
                 return@setOnKeyListener true
             }
             false
         })
     }
 
+    private fun View.hideKeyboard(){
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
+    }
+
     private fun initRecyclerView() {
-        recycler_view = findViewById(R.id.recycler_view)
-        recycler_view.setHasFixedSize(true)
-        recycler_view.setLayoutManager(GridLayoutManager(this, 2))
-        recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        recyclerView = findViewById(R.id.recycler_view)
+        recyclerView.setHasFixedSize(true)
+        recyclerView.setLayoutManager(GridLayoutManager(this, 2))
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 visibleImageCount = recyclerView.childCount
@@ -103,12 +111,12 @@ class MainActivity : AppCompatActivity() {
         val pixabayService: PixabayService = retrofit!!.create(
             PixabayService::class.java
         )
-        cur_page++
-        pixabayService?.getImages(API_KEY,
+        curPage++
+        pixabayService.getImages(API_KEY,
             query,
             "photo",
-            cur_page,
-            PER_PAGE)?.enqueue(object : Callback<PixabayResponse>{
+            curPage,
+            PER_PAGE).enqueue(object : Callback<PixabayResponse>{
             override fun onResponse(
                 call: Call<PixabayResponse>,
                 response: Response<PixabayResponse>
@@ -128,7 +136,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addAndRenderDataCurList(images: List<PixabayImage>) {
-        cur_image_list.addAll(images)
+        curImageList.addAll(images)
         renderSearchTab()
     }
 
@@ -162,28 +170,29 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-        recycler_view.adapter = pixabayImageAdapter
+        recyclerView.adapter = pixabayImageAdapter
     }
 
     private fun manageFavList(pixabayImage: PixabayImage) {
-        if (current_shown_tab==1 && fav_ids.contains(pixabayImage.id)) {
-            fav_image_list.remove(pixabayImage)
-            fav_ids.remove(pixabayImage.id)
+        if (currentShownTab==1 && favIds.contains(pixabayImage.id)) {
+            favImageList.remove(pixabayImage)
+            favIds.remove(pixabayImage.id)
+            renderFavTab()
             return
         }
-        if(current_shown_tab==0 && !(fav_ids.contains(pixabayImage.id))){
-            fav_image_list.add(pixabayImage)
-            fav_ids.add(pixabayImage.id)
+        if(currentShownTab==0 && !(favIds.contains(pixabayImage.id))){
+            favImageList.add(pixabayImage)
+            favIds.add(pixabayImage.id)
         }
     }
 
     fun renderSearchTab() {
-        current_shown_tab = 0
-        renderImages(cur_image_list)
+        currentShownTab = 0
+        renderImages(curImageList)
     }
 
     fun renderFavTab() {
-        current_shown_tab = 1
-        renderImages(fav_image_list)
+        currentShownTab = 1
+        renderImages(favImageList)
     }
 }
