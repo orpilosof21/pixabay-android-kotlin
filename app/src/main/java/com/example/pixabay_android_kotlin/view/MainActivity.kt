@@ -28,14 +28,15 @@ import kotlin.collections.HashSet
 
 class MainActivity : AppCompatActivity() {
     private val INIT_PAGE = 0
-    private val PER_PAGE = 6
+    private val DISPLAY_ROWS = 3
+    private val PER_PAGE = DISPLAY_ROWS*3
 
     //const
     private var retrofit: Retrofit? = null
     private lateinit var recyclerView: RecyclerView;
-    private val curImageList: ArrayList<PixabayImage> = ArrayList<PixabayImage>()
-    private val favImageList: ArrayList<PixabayImage> = ArrayList<PixabayImage>()
-    private val favIds: MutableSet<Int> = HashSet<Int>()
+    private val curImageList: ArrayList<PixabayImage> = ArrayList()
+    private val favImageList: ArrayList<PixabayImage> = ArrayList()
+    private val favIds: MutableSet<Int> = HashSet()
 
     private lateinit var inputText: EditText
     private var query = ""
@@ -82,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     private fun initRecyclerView() {
         recyclerView = findViewById(R.id.recycler_view)
         recyclerView.setHasFixedSize(true)
-        recyclerView.setLayoutManager(GridLayoutManager(this, 2))
+        recyclerView.setLayoutManager(GridLayoutManager(this, DISPLAY_ROWS))
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -90,7 +91,7 @@ class MainActivity : AppCompatActivity() {
                 totalImageCount = recyclerView.layoutManager!!.itemCount
                 lastImageCount =
                     (recyclerView.layoutManager as GridLayoutManager?)!!.findLastCompletelyVisibleItemPosition()
-                if (tabs!!.selectedTabPosition == 0 && recyclerViewLoading) {
+                if (tabs.selectedTabPosition == 0 && recyclerViewLoading) {
                     if (lastImageCount + visibleImageCount >= totalImageCount) {
                         connectAndGetApiData()
                         recyclerViewLoading = false
