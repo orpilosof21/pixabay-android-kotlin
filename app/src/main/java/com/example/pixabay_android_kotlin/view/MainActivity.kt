@@ -28,8 +28,8 @@ import kotlin.collections.HashSet
 
 class MainActivity : AppCompatActivity() {
     private val INIT_PAGE = 0
-    private val DISPLAY_ROWS = 3
-    private val PER_PAGE = DISPLAY_ROWS*3
+    private val DISPLAY_COLS = 3
+    private val PER_PAGE = DISPLAY_COLS*3
 
     //const
     private var retrofit: Retrofit? = null
@@ -83,14 +83,14 @@ class MainActivity : AppCompatActivity() {
     private fun initRecyclerView() {
         recyclerView = findViewById(R.id.recycler_view)
         recyclerView.setHasFixedSize(true)
-        recyclerView.setLayoutManager(GridLayoutManager(this, DISPLAY_ROWS))
+        recyclerView.setLayoutManager(GridLayoutManager(this, DISPLAY_COLS))
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 visibleImageCount = recyclerView.childCount
                 totalImageCount = recyclerView.layoutManager!!.itemCount
                 lastImageCount =
-                    (recyclerView.layoutManager as GridLayoutManager?)!!.findLastCompletelyVisibleItemPosition()
+                    (recyclerView.layoutManager as GridLayoutManager).findLastCompletelyVisibleItemPosition()
                 if (tabs.selectedTabPosition == 0 && recyclerViewLoading) {
                     if (lastImageCount + visibleImageCount >= totalImageCount) {
                         connectAndGetApiData()
@@ -176,15 +176,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun manageFavList(pixabayImage: PixabayImage) {
         if (currentShownTab==1 && favIds.contains(pixabayImage.id)) {
-            favImageList.remove(pixabayImage)
-            favIds.remove(pixabayImage.id)
+            removeFromFavList(pixabayImage)
             renderFavTab()
             return
         }
         if(currentShownTab==0 && !(favIds.contains(pixabayImage.id))){
-            favImageList.add(pixabayImage)
-            favIds.add(pixabayImage.id)
+            addToFavList(pixabayImage)
         }
+    }
+
+    private fun addToFavList(pixabayImage: PixabayImage) {
+        favImageList.add(pixabayImage)
+        favIds.add(pixabayImage.id)
+    }
+
+    private fun removeFromFavList(pixabayImage: PixabayImage) {
+        favImageList.remove(pixabayImage)
+        favIds.remove(pixabayImage.id)
     }
 
     fun renderSearchTab() {
