@@ -50,7 +50,7 @@ class PixabayImageAdapter(
         )
     }
 
-    fun setmOnItemClickListener(clickListener: OnItemClickListener?) {
+    fun setOnItemClickListener(clickListener: OnItemClickListener?) {
         mOnItemClickListener = clickListener
     }
 

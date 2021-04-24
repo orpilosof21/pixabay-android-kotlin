@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity() {
     private fun renderImages(images: List<PixabayImage>) {
         val pixabayImageAdapter =
             PixabayImageAdapter(images, R.layout.image_item, applicationContext)
-            pixabayImageAdapter.setmOnItemClickListener(object :
+            pixabayImageAdapter.setOnItemClickListener(object :
             PixabayImageAdapter.OnItemClickListener {
             override fun onImageClicked(
                 v: View?,
