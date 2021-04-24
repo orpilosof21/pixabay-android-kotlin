@@ -57,7 +57,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="625dp"
+        android:layout_height="598dp"
         app:layout_anchor="@+id/nestedScrollView"
         app:layout_anchorGravity="center" />
 
