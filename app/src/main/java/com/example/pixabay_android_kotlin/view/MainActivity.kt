@@ -32,8 +32,8 @@ class MainActivity : AppCompatActivity() {
     private val PER_PAGE = DISPLAY_COLS*3
 
     //const
-    private var retrofit: Retrofit? = null
-    private lateinit var recyclerView: RecyclerView;
+    private lateinit var retrofit: Retrofit
+    private lateinit var recyclerView: RecyclerView
     private val curImageList: ArrayList<PixabayImage> = ArrayList()
     private val favImageList: ArrayList<PixabayImage> = ArrayList()
     private val favIds: MutableSet<Int> = HashSet()
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     private  var totalImageCount:Int = 0
     private  var lastImageCount:Int = 0
     private var recyclerViewLoading = true
-    private lateinit var tabs: TabLayout;
+    private lateinit var tabs: TabLayout
     private var currentShownTab = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,10 +61,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initInputText() {
-        inputText = findViewById(R.id.inputQueryText);
+        inputText = findViewById(R.id.inputQueryText)
         inputText.setOnKeyListener(View.OnKeyListener setOnKeyListener@{ v: View?, keyCode: Int, event: KeyEvent ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
-                query = inputText.getText().toString()
+                query = inputText.text.toString()
                 curPage = INIT_PAGE
                 curImageList.clear()
                 connectAndGetApiData()
@@ -83,14 +83,13 @@ class MainActivity : AppCompatActivity() {
     private fun initRecyclerView() {
         recyclerView = findViewById(R.id.recycler_view)
         recyclerView.setHasFixedSize(true)
-        recyclerView.setLayoutManager(GridLayoutManager(this, DISPLAY_COLS))
+        recyclerView.layoutManager = GridLayoutManager(this, DISPLAY_COLS)
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 visibleImageCount = recyclerView.childCount
                 totalImageCount = recyclerView.layoutManager!!.itemCount
-                lastImageCount =
-                    (recyclerView.layoutManager as GridLayoutManager).findLastCompletelyVisibleItemPosition()
+                lastImageCount = (recyclerView.layoutManager as GridLayoutManager).findLastCompletelyVisibleItemPosition()
                 if (tabs.selectedTabPosition == 0 && recyclerViewLoading) {
                     if (lastImageCount + visibleImageCount >= totalImageCount) {
                         connectAndGetApiData()
@@ -106,10 +105,8 @@ class MainActivity : AppCompatActivity() {
         if (tabs.selectedTabPosition == 1) {
             return
         }
-        if (retrofit == null) {
-            retrofit = ApiClient.getApiClient()
-        }
-        val pixabayService: PixabayService = retrofit!!.create(
+        retrofit = ApiClient.getApiClient()
+        val pixabayService: PixabayService = retrofit.create(
             PixabayService::class.java
         )
         curPage++
