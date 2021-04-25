@@ -102,9 +102,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
     fun connectAndGetApiData() {
-        if (tabs.selectedTabPosition == 1) {
-            return
-        }
         retrofit = ApiClient.getApiClient()
         val pixabayService: PixabayService = retrofit.create(
             PixabayService::class.java
@@ -135,6 +132,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun addAndRenderDataCurList(images: List<PixabayImage>) {
         curImageList.addAll(images)
+        if (tabs.selectedTabPosition == 1) {
+            return
+        }
         renderSearchTab()
     }
 
